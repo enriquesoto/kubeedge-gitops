@@ -1,0 +1,21 @@
+# App-of-apps bootstrap: the one Application applied manually. It points
+# Argo CD at apps/ (non-recursive — only flat Application manifests belong
+# there) so everything else is added by committing a new file to apps/.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/enriquesoto/kubeedge-gitops.git
+    targetRevision: main
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

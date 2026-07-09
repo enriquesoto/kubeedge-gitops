@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudcore
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/enriquesoto/kubeedge-gitops.git
+    targetRevision: main
+    path: charts/cloudcore/chart
+    helm:
+      valueFiles:
+        - ../values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubeedge
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

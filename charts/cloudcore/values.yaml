@@ -1,0 +1,15 @@
+# Override values for the vendored kubeedge/cloudcore chart (./chart).
+# Applied on top of ./chart/values.yaml.
+
+cloudCore:
+  service:
+    # AKS nodes have no public IP; a LoadBalancer gives CloudHub a public
+    # address that edge devices can reach.
+    type: "LoadBalancer"
+  modules:
+    cloudHub:
+      # TODO: after the first sync, read the LoadBalancer external IP with
+      #   kubectl get svc cloudcore -n kubeedge
+      # and replace this placeholder, then commit — Argo CD will self-heal.
+      advertiseAddress:
+        - "REPLACE_WITH_LOADBALANCER_EXTERNAL_IP"
