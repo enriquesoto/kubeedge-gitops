@@ -25,3 +25,12 @@ spec:
       selfHeal: false
     syncOptions:
       - CreateNamespace=true
+  ignoreDifferences:
+    # aggregationRule-based ClusterRoles have their `rules` filled in
+    # server-side by Kubernetes; git never has that field, so it's a
+    # permanent, harmless diff otherwise.
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: cloudcore
+      jsonPointers:
+        - /rules
