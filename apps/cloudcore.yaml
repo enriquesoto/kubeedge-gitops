@@ -18,6 +18,10 @@ spec:
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true
+      # selfHeal off: the cloudcore Secret is a Helm pre-install hook with
+      # hook-delete-policy=before-hook-creation, so Argo CD deletes and
+      # recreates it on every sync. With selfHeal it kept re-triggering
+      # syncs every ~10-20s, racing the hostNetwork pod's volume mount.
+      selfHeal: false
     syncOptions:
       - CreateNamespace=true
