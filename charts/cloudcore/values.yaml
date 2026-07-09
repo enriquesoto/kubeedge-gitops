@@ -3,13 +3,16 @@
 
 cloudCore:
   service:
-    # AKS nodes have no public IP; a LoadBalancer gives CloudHub a public
-    # address that edge devices can reach.
-    type: "LoadBalancer"
+    # The upstream chart's own Service only supports NodePort/ClusterIP;
+    # this enables the extra LoadBalancer Service added in
+    # templates/service_cloudcore_lb.yaml, needed because AKS nodes have
+    # no public IP.
+    loadBalancerEnable: true
   modules:
     cloudHub:
-      # TODO: after the first sync, read the LoadBalancer external IP with
-      #   kubectl get svc cloudcore -n kubeedge
-      # and replace this placeholder, then commit — Argo CD will self-heal.
+      # Placeholder — must be a syntactically valid IP or CloudCore panics
+      # on startup (x509 SAN parsing). After the LoadBalancer Service gets
+      # its external IP (kubectl get svc cloudcore-lb -n kubeedge), replace
+      # this and commit — Argo CD will self-heal.
       advertiseAddress:
-        - "REPLACE_WITH_LOADBALANCER_EXTERNAL_IP"
+        - "0.0.0.0"

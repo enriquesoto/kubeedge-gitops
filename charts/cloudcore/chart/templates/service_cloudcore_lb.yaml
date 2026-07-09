@@ -1,0 +1,41 @@
+{{- if .Values.cloudCore.service.loadBalancerEnable }}
+# Supplemental LoadBalancer Service, added on top of the upstream chart.
+# The upstream service_cloudcore.yaml only ever renders NodePort or
+# ClusterIP, and defaults to ClusterIP whenever hostNetWork is true — no
+# option gives a managed cluster (e.g. AKS, where nodes have no public IP)
+# a publicly reachable address for CloudHub. This mirrors that Service's
+# selector/ports with type: LoadBalancer instead.
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudcore-lb
+  labels:
+    k8s-app: kubeedge
+    kubeedge: cloudcore
+spec:
+  type: LoadBalancer
+  selector:
+    k8s-app: kubeedge
+    kubeedge: cloudcore
+  ports:
+    - name: cloudhub
+      port: 10000
+      targetPort: 10000
+      protocol: TCP
+    - name: cloudhub-quic
+      port: 10001
+      targetPort: 10001
+      protocol: UDP
+    - name: cloudhub-https
+      port: 10002
+      targetPort: 10002
+      protocol: TCP
+    - name: cloudstream
+      port: 10003
+      targetPort: 10003
+      protocol: TCP
+    - name: tunnelport
+      port: 10004
+      targetPort: 10004
+      protocol: TCP
+{{- end }}
