@@ -18,3 +18,9 @@ cloudCore:
       # External IP of the cloudcore-lb Service (kubectl get svc cloudcore-lb -n kubeedge).
       advertiseAddress:
         - "172.176.51.34"
+    dynamicController:
+      # Disabled by default in the upstream chart, but CloudCore's metaserver
+      # relies on it to proxy dynamic API operations (e.g. Node create/patch)
+      # for edge nodes — without it, EdgeCore's node registration gets
+      # malformed/truncated responses back from CloudCore.
+      enable: true
