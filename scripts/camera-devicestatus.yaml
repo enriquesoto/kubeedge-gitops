@@ -1,0 +1,34 @@
+apiVersion: devices.kubeedge.io/v1beta1
+kind: DeviceStatus
+metadata:
+  name: camera-01
+  namespace: kubeedge
+  ownerReferences:
+    - apiVersion: devices.kubeedge.io/v1beta1
+      kind: Device
+      name: camera-01
+      uid: 105f111e-fa24-45df-b775-de076fa27045
+status:
+  state: Online
+  lastOnlineTime: "2026-07-12T22:27:50Z"
+  twins:
+    - propertyName: status
+      reported:
+        value: "online"
+        metadata:
+          timestamp: "1783980470000"
+    - propertyName: motionDetected
+      reported:
+        value: "false"
+        metadata:
+          timestamp: "1783980470000"
+    - propertyName: frameCount
+      reported:
+        value: "0"
+        metadata:
+          timestamp: "1783980470000"
+    - propertyName: confidence
+      reported:
+        value: "0.0"
+        metadata:
+          timestamp: "1783980470000"

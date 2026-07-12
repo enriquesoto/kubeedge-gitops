@@ -1,0 +1,23 @@
+apiVersion: devices.kubeedge.io/v1beta1
+kind: DeviceModel
+metadata:
+  name: camera-model
+  namespace: kubeedge
+spec:
+  properties:
+    - name: status
+      type: STRING
+      accessMode: ReadOnly
+      description: "Camera connectivity status"
+    - name: motionDetected
+      type: BOOLEAN
+      accessMode: ReadOnly
+      description: "Whether motion was detected in the last frame"
+    - name: frameCount
+      type: INT
+      accessMode: ReadOnly
+      description: "Number of frames processed since startup"
+    - name: confidence
+      type: FLOAT
+      accessMode: ReadOnly
+      description: "Detection confidence of the last inference, 0-1"
