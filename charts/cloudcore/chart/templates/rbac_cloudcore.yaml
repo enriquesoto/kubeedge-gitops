@@ -24,7 +24,10 @@ rules:
     resources: ["leases"]
     verbs: ["get", "list", "watch", "create", "update"]
   - apiGroups: ["devices.kubeedge.io"]
-    resources: ["devices", "devicemodels", "devices/status", "devicemodels/status"]
+    # devicestatuses added on top of upstream: the v1.23 chart forgot the
+    # new DeviceStatus CRD, so devicecontroller's informer never syncs and
+    # devices are never pushed down to edge nodes.
+    resources: ["devices", "devicemodels", "devicestatuses", "devices/status", "devicemodels/status", "devicestatuses/status"]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
   - apiGroups: ["reliablesyncs.kubeedge.io"]
     resources: ["objectsyncs", "clusterobjectsyncs", "objectsyncs/status", "clusterobjectsyncs/status"]
