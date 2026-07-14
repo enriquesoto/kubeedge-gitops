@@ -4,6 +4,7 @@ metadata:
   name: camera-model
   namespace: kubeedge
 spec:
+  protocol: videosim
   properties:
     - name: status
       type: STRING

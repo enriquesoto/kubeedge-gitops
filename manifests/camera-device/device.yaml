@@ -9,12 +9,46 @@ spec:
   deviceModelRef:
     name: camera-model
   nodeName: kubeedge-edge01
+  protocol:
+    protocolName: videosim
+    configData:
+      videoPath: /var/lib/videosim/sample.mp4
+      sampleFPS: 4
+      motionThreshold: 0.02
   properties:
     - name: status
       collectCycle: 10000
+      reportCycle: 10000
+      reportToCloud: true
+      visitors:
+        protocolName: videosim
+        configData:
+          dataType: string
+          propertyName: status
     - name: motionDetected
-      collectCycle: 10000
+      collectCycle: 5000
+      reportCycle: 5000
+      reportToCloud: true
+      visitors:
+        protocolName: videosim
+        configData:
+          dataType: boolean
+          propertyName: motionDetected
     - name: frameCount
       collectCycle: 10000
+      reportCycle: 10000
+      reportToCloud: true
+      visitors:
+        protocolName: videosim
+        configData:
+          dataType: int
+          propertyName: frameCount
     - name: confidence
-      collectCycle: 10000
+      collectCycle: 5000
+      reportCycle: 5000
+      reportToCloud: true
+      visitors:
+        protocolName: videosim
+        configData:
+          dataType: float
+          propertyName: confidence
