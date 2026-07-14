@@ -24,7 +24,9 @@ while true; do
     CONFIDENCE="0.0"
   fi
 
-  kubectl patch devicestatus "$DEVICE" -n "$NAMESPACE" --type=merge -p "{
+  # A transient API-server timeout must not kill the loop — a real mapper
+  # keeps sampling while offline and reports again when the link is back.
+  if kubectl patch devicestatus "$DEVICE" -n "$NAMESPACE" --type=merge --request-timeout=15s -p "{
     \"status\": {
       \"state\": \"Online\",
       \"lastOnlineTime\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",
@@ -35,8 +37,10 @@ while true; do
         {\"propertyName\": \"confidence\", \"reported\": {\"value\": \"$CONFIDENCE\", \"metadata\": {\"timestamp\": \"$TS\"}}}
       ]
     }
-  }" > /dev/null
-
-  echo "$(date +%T) frame=$FRAME_COUNT motion=$MOTION confidence=$CONFIDENCE"
+  }" > /dev/null 2>&1; then
+    echo "$(date +%T) frame=$FRAME_COUNT motion=$MOTION confidence=$CONFIDENCE"
+  else
+    echo "$(date +%T) frame=$FRAME_COUNT PATCH FAILED (transient?) — reintento en el proximo ciclo"
+  fi
   sleep "$INTERVAL"
 done
