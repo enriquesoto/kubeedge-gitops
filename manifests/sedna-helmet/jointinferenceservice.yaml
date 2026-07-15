@@ -20,9 +20,9 @@ spec:
       name: "IBT"
       parameters:
         - key: "threshold_img"
-          value: "0.9"
+          value: "0.5"
         - key: "threshold_box"
-          value: "0.9"
+          value: "0.5"
     template:
       spec:
         nodeName: kubeedge-edge01
