@@ -1,0 +1,17 @@
+apiVersion: sedna.io/v1alpha1
+kind: Model
+metadata:
+  name: helmet-detection-inference-little-model
+  namespace: default
+spec:
+  url: "/data/little-model/yolov3_resnet18.pb"
+  format: "pb"
+---
+apiVersion: sedna.io/v1alpha1
+kind: Model
+metadata:
+  name: helmet-detection-inference-big-model
+  namespace: default
+spec:
+  url: "/data/big-model/yolov3_darknet.pb"
+  format: "pb"

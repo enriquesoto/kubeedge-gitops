@@ -1,0 +1,92 @@
+# Adaptaciones sobre el ejemplo oficial de Sedna (helmet detection) para
+# nuestro cluster AKS + edge Multipass:
+# - edgeWorker: toleration del taint node-role.kubernetes.io/edge,
+#   hostNetwork (para alcanzar el RTSP local y heredar /etc/hosts de la VM),
+#   dnsPolicy Default (no hay DNS de cluster en el edge),
+#   video_url apuntando al mediamtx local (puerto 8554).
+# - El Service <name>-cloud que crea el GM se patchea aparte a LoadBalancer,
+#   y el nombre DNS helmet-inference-cloud.default se resuelve en la VM via
+#   /etc/hosts -> IP del LB (el edge no puede resolver DNS de cluster).
+apiVersion: sedna.io/v1alpha1
+kind: JointInferenceService
+metadata:
+  name: helmet-inference
+  namespace: default
+spec:
+  edgeWorker:
+    model:
+      name: "helmet-detection-inference-little-model"
+    hardExampleMining:
+      name: "IBT"
+      parameters:
+        - key: "threshold_img"
+          value: "0.9"
+        - key: "threshold_box"
+          value: "0.9"
+    template:
+      spec:
+        nodeName: kubeedge-edge01
+        hostNetwork: true
+        dnsPolicy: Default
+        tolerations:
+          - key: node-role.kubernetes.io/edge
+            operator: Exists
+            effect: NoSchedule
+        containers:
+          - image: kubeedge/sedna-example-joint-inference-helmet-detection-little:v0.3.0
+            imagePullPolicy: IfNotPresent
+            name: little-model
+            env:
+              - name: input_shape
+                value: "416,736"
+              - name: "video_url"
+                value: "rtsp://127.0.0.1:8554/video"
+              - name: "all_examples_inference_output"
+                value: "/data/output"
+              - name: "hard_example_cloud_inference_output"
+                value: "/data/hard_example_cloud_inference_output"
+              - name: "hard_example_edge_inference_output"
+                value: "/data/hard_example_edge_inference_output"
+            resources:
+              requests:
+                memory: 64M
+                cpu: 100m
+              limits:
+                memory: 1536Mi
+            volumeMounts:
+              - name: outputdir
+                mountPath: /data/
+        volumes:
+          - name: outputdir
+            hostPath:
+              path: /joint_inference/output
+              type: Directory
+
+  cloudWorker:
+    model:
+      name: "helmet-detection-inference-big-model"
+    template:
+      spec:
+        # sin nodeName fijo: el primer intento con nodeName al nodo B2s lleno
+        # produjo un loop de pods OutOfmemory (kubelet los rechazaba en
+        # admision y el Deployment creaba reemplazos sin parar). Dejamos que
+        # el scheduler elija un nodo cloud con memoria libre.
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: node-role.kubernetes.io/edge
+                      operator: DoesNotExist
+        containers:
+          - image: kubeedge/sedna-example-joint-inference-helmet-detection-big:v0.3.0
+            name: big-model
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: "input_shape"
+                value: "544,544"
+            resources:
+              requests:
+                memory: 1Gi
+              limits:
+                memory: 2Gi
