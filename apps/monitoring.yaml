@@ -67,9 +67,20 @@ spec:
             requests:
               memory: 100Mi
               cpu: 50m
-        # el node-exporter no puede correr utilmente en el edge (Prometheus no
-        # alcanza 9100 detras del NAT); se queda solo en nodos cloud (el taint
-        # del edge ya lo excluye).
+        # node-exporter: 9100 ya esta ocupado en los nodos AKS -> 9110.
+        # Y excluido del edge: Prometheus no alcanza su 9110 detras del NAT
+        # (el tunel de KubeEdge solo proxya el puerto del kubelet/edged).
+        prometheus-node-exporter:
+          service:
+            port: 9110
+            targetPort: 9110
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: node-role.kubernetes.io/edge
+                        operator: DoesNotExist
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
