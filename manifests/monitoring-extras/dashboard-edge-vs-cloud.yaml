@@ -1,0 +1,56 @@
+# Dashboard auto-cargado por el sidecar de Grafana (label grafana_dashboard).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-edge-vs-cloud
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  edge-vs-cloud.json: |
+    {
+      "title": "Edge vs Cloud — Carga de Pods",
+      "uid": "edge-vs-cloud",
+      "timezone": "browser",
+      "refresh": "30s",
+      "time": {"from": "now-1h", "to": "now"},
+      "panels": [
+        {
+          "id": 1, "type": "timeseries", "title": "CPU pods EDGE (kubeedge-edge01)",
+          "gridPos": {"x": 0, "y": 0, "w": 12, "h": 9},
+          "fieldConfig": {"defaults": {"unit": "none", "custom": {"fillOpacity": 15}}},
+          "targets": [{
+            "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{node=\"kubeedge-edge01\", pod!=\"\"}[5m]))",
+            "legendFormat": "{{pod}}"
+          }]
+        },
+        {
+          "id": 2, "type": "timeseries", "title": "CPU pods CLOUD (nodos AKS)",
+          "gridPos": {"x": 12, "y": 0, "w": 12, "h": 9},
+          "fieldConfig": {"defaults": {"unit": "none", "custom": {"fillOpacity": 15}}},
+          "targets": [{
+            "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", pod!=\"\", container!=\"\"}[5m]))",
+            "legendFormat": "{{pod}}"
+          }]
+        },
+        {
+          "id": 3, "type": "timeseries", "title": "Memoria pods EDGE (working set)",
+          "gridPos": {"x": 0, "y": 9, "w": 12, "h": 9},
+          "fieldConfig": {"defaults": {"unit": "bytes", "custom": {"fillOpacity": 15}}},
+          "targets": [{
+            "expr": "sum by (pod) (container_memory_working_set_bytes{node=\"kubeedge-edge01\", pod!=\"\", container=\"\"})",
+            "legendFormat": "{{pod}}"
+          }]
+        },
+        {
+          "id": 4, "type": "timeseries", "title": "Memoria pods CLOUD (working set)",
+          "gridPos": {"x": 12, "y": 9, "w": 12, "h": 9},
+          "fieldConfig": {"defaults": {"unit": "bytes", "custom": {"fillOpacity": 15}}},
+          "targets": [{
+            "expr": "sum by (pod) (container_memory_working_set_bytes{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\", pod!=\"\", container!=\"\", namespace=~\"default|kubeedge|sedna\"})",
+            "legendFormat": "{{pod}}"
+          }]
+        }
+      ],
+      "schemaVersion": 39
+    }
