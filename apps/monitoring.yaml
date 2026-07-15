@@ -24,28 +24,30 @@ spec:
                 cpu: 100m
               limits:
                 memory: 900Mi
-            # scrape extra: cAdvisor/metrics del edged (puerto 10350) via el
-            # tunel cloudStream/edgeStream de KubeEdge (iptables-manager DNATea
-            # el trafico cloud->edge:10350 hacia cloudcore:10003).
+            # scrape extra del edge VIA PROXY DEL API SERVER: el apiserver rutea
+            # al kubeletEndpoint vigente del nodo (puerto de tunel dinamico que
+            # cloudcore reescribe, ej. 10359) y el iptables-manager DNATea ese
+            # trafico a cloudcore:10003 -> tunel cloudStream/edgeStream -> edged.
+            # Verificado: kubectl get --raw /api/v1/nodes/kubeedge-edge01/proxy/metrics/cadvisor
             additionalScrapeConfigs:
               - job_name: kubeedge-edge-cadvisor
                 scheme: https
                 tls_config:
-                  insecure_skip_verify: true
+                  ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                 bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-                metrics_path: /metrics/cadvisor
+                metrics_path: /api/v1/nodes/kubeedge-edge01/proxy/metrics/cadvisor
                 static_configs:
-                  - targets: ["192.168.252.2:10350"]
+                  - targets: ["kubernetes.default.svc:443"]
                     labels:
                       node: kubeedge-edge01
               - job_name: kubeedge-edge-kubelet
                 scheme: https
                 tls_config:
-                  insecure_skip_verify: true
+                  ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
                 bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-                metrics_path: /metrics
+                metrics_path: /api/v1/nodes/kubeedge-edge01/proxy/metrics
                 static_configs:
-                  - targets: ["192.168.252.2:10350"]
+                  - targets: ["kubernetes.default.svc:443"]
                     labels:
                       node: kubeedge-edge01
         grafana:
